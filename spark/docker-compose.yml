@@ -1,0 +1,55 @@
+version: "3.3"
+services:
+  spark-master:
+    image: bde2020/spark-master:3.3.0-hadoop3.3
+    ports:
+      - "9100:8080"
+      - "7077:7077"
+    volumes:
+       - ./apps:/opt/spark-apps
+       - ./data:/opt/spark-data
+       - ./spark:/opt/spark
+    environment:
+      - PYSPARK_PYTHON=/usr/bin/python3
+      - SPARK_LOCAL_IP=spark-master
+      - SPARK_WORKLOAD=master
+  spark-worker-a:
+    image: bde2020/spark-worker:3.3.0-hadoop3.3
+    ports:
+      - "9110:8080"
+      - "7002:7002"
+    depends_on:
+      - spark-master
+    environment:
+      - PYSPARK_PYTHON=/usr/bin/python3
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_DRIVER_MEMORY=1G
+      - SPARK_EXECUTOR_MEMORY=2G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-a
+    volumes:
+       - ./apps:/opt/spark-apps
+       - ./data:/opt/spark-data
+       - ./spark:/opt/spark
+  spark-worker-b:
+    image: bde2020/spark-worker:3.3.0-hadoop3.3
+    ports:
+      - "9120:8080"
+      - "7001:7000"
+    depends_on:
+      - spark-master
+    environment:
+      - PYSPARK_PYTHON=/usr/bin/python3
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_DRIVER_MEMORY=1G
+      - SPARK_EXECUTOR_MEMORY=2G
+      - SPARK_WORKLOAD=worker
+      - SPARK_LOCAL_IP=spark-worker-b
+    volumes:
+        - ./apps:/opt/spark-apps
+        - ./data:/opt/spark-data
+        - ./spark:/opt/spark
